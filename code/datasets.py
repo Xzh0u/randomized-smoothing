@@ -4,6 +4,7 @@ import torch
 import os
 from torch.utils.data import Dataset
 import h5py
+import numpy as np
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -14,7 +15,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 IMAGENET_LOC_ENV = "IMAGENET_DIR"
 
 # list of all datasets
-DATASETS = ["imagenet", "cifar10", "mnist"]
+DATASETS = ["imagenet", "cifar10", "mnist", "usps", "mnist_texture"]
 
 
 def get_dataset(dataset: str, split: str) -> Dataset:
@@ -25,6 +26,10 @@ def get_dataset(dataset: str, split: str) -> Dataset:
         return _cifar10(split)
     elif dataset == "mnist":
         return _mnist(split)
+    elif dataset == "usps":
+        return _usps(split)
+    elif dataset == "mnist_texture":
+        return _mnist_texture(split)
 
 
 def get_num_classes(dataset: str):
@@ -102,13 +107,26 @@ def _mnist(split: str) -> Dataset:
 
 
 def _usps(split: str) -> Dataset:
-    with h5py.File(path, 'r') as hf:
+    with h5py.File('dataset_cache/usps.h5', 'r') as hf:
         train = hf.get('train')
         X_tr = train.get('data')[:]
         y_tr = train.get('target')[:]
         test = hf.get('test')
         X_te = test.get('data')[:]
         y_te = test.get('target')[:]
+    if split == "train":
+        return X_tr, y_tr
+    elif split == "test":
+        return X_te, y_te
+
+
+def _mnist_texture(split: str) -> Dataset:
+    X_tr = np.load('dataset_cache/MNIST_/Xtrain_random.npy')
+    y_tr = get_dataset("mnist", "train").targets
+    if split == "train":
+        return X_tr, y_tr
+    elif split == "test":
+        return 0
 
 
 class NormalizeLayer(torch.nn.Module):
@@ -128,6 +146,14 @@ class NormalizeLayer(torch.nn.Module):
         super(NormalizeLayer, self).__init__()
         self.means = torch.tensor(means).to(device)
         self.sds = torch.tensor(sds).to(device)
+
+    # def forward(self, input: torch.tensor):
+    #     (num_channels, height, width) = input.shape
+    #     means = self.means.repeat(
+    #         (height, width, 1)).permute(2, 0, 1)
+    #     sds = self.sds.repeat(
+    #         (height, width, 1)).permute(2, 0, 1)
+    #     return (input - means) / sds
 
     def forward(self, input: torch.tensor):
         (batch_size, num_channels, height, width) = input.shape

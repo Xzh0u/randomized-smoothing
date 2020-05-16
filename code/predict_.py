@@ -22,7 +22,7 @@ parser.add_argument("--skip", type=int, default=1,
 parser.add_argument("--max", type=int, default=-1,
                     help="stop after this many examples")
 parser.add_argument(
-    "--split", choices=["train", "test"], default="test", help="train or test set")
+    "--split", choices=["train", "test"], default="train", help="train or test set")
 parser.add_argument("--N", type=int, default=100000,
                     help="number of samples to use")
 parser.add_argument("--alpha", type=float, default=0.001,
@@ -44,21 +44,21 @@ if __name__ == "__main__":
     print("idx\tlabel\tpredict\tcorrect\ttime", file=f, flush=True)
 
     # iterate through the dataset
-    dataset = get_dataset(args.dataset, args.split)
+    X_te, y_te = get_dataset("mnist_texture", args.split)
     count = 0
-    for i in range(len(dataset)):
+    for i in range(X_te.shape[0]):
 
         # only certify every args.skip examples, and stop after args.max examples
         if i % args.skip != 0:
             continue
         if i == args.max:
             break
-
-        (x, label) = dataset[i]
         # show the image
-        # plt.imshow(x.numpy()[0], cmap='gray')
+        # plt.imshow(X_te[i].reshape(16, 16), cmap='gray')
         # plt.show()
+        x = torch.from_numpy(X_te[i].reshape(1, 28, 28))
 
+        label = y_te[i]
         before_time = time()
 
         # make the prediction
@@ -70,12 +70,13 @@ if __name__ == "__main__":
         correct = int(int(prediction[0]) == label)
         if correct == 1:
             count = count + 1
+
         time_elapsed = str(datetime.timedelta(
             seconds=(after_time - before_time)))
 
         # log the prediction and whether it was correct
         print("{}\t{}\t{}\t{}\t{}".format(i, label, int(prediction[0]),
                                           correct, time_elapsed), file=f, flush=True)
-    acc = count/100
+    acc = count/599
     print("The accuracy is:", acc)
     f.close()
