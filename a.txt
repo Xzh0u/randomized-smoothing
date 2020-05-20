@@ -1,2 +1,0 @@
-idx	label	predict	radius	correct	time
-0	3	3	0.378	1	0:14:40.139989
