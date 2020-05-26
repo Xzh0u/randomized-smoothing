@@ -1,16 +1,16 @@
-""" This script loads a base classifier and then runs PREDICT on many examples from a dataset.
-"""
+# evaluate a smoothed classifier on a dataset
 import argparse
+import os
 # import setGPU
 from datasets import get_dataset, DATASETS, get_num_classes
 from core import Smooth
 from time import time
 import torch
-from architectures import get_architecture
 import datetime
-import matplotlib.pyplot as plt
+import cv2
+from architectures import get_architecture
 
-parser = argparse.ArgumentParser(description='Predict on many examples')
+parser = argparse.ArgumentParser(description='Certify many examples')
 parser.add_argument("dataset", choices=DATASETS, help="which dataset")
 parser.add_argument("base_classifier", type=str,
                     help="path to saved pytorch model of base classifier")
@@ -23,6 +23,7 @@ parser.add_argument("--max", type=int, default=-1,
                     help="stop after this many examples")
 parser.add_argument(
     "--split", choices=["train", "test"], default="train", help="train or test set")
+parser.add_argument("--N0", type=int, default=100)
 parser.add_argument("--N", type=int, default=100000,
                     help="number of samples to use")
 parser.add_argument("--alpha", type=float, default=0.001,
@@ -31,21 +32,21 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     # load the base classifier
-    checkpoint = torch.load(args.base_classifier)
+    checkpoint = torch.load(args.base_classifier,
+                            map_location=torch.device('cpu'))
     base_classifier = get_architecture(checkpoint["arch"], args.dataset)
     base_classifier.load_state_dict(checkpoint['state_dict'])
 
-    # create the smoothed classifier g
+    # create the smooothed classifier g
     smoothed_classifier = Smooth(
         base_classifier, get_num_classes(args.dataset), args.sigma)
 
     # prepare output file
     f = open(args.outfile, 'w')
-    print("idx\tlabel\tpredict\tcorrect\ttime", file=f, flush=True)
+    print("idx\tlabel\tpredict\tradius\tcorrect\ttime", file=f, flush=True)
 
     # iterate through the dataset
-    X_te, y_te = get_dataset("mnist_texture", args.split)
-    count = 0
+    X_te, y_te = get_dataset("usps", args.split)
     for i in range(X_te.shape[0]):
 
         # only certify every args.skip examples, and stop after args.max examples
@@ -53,30 +54,25 @@ if __name__ == "__main__":
             continue
         if i == args.max:
             break
-        # show the image
-        # plt.imshow(X_te[i].reshape(16, 16), cmap='gray')
-        # plt.show()
-        x = torch.from_numpy(X_te[i].reshape(1, 28, 28))
 
+        width = 28
+        height = 28
+        dim = (width, height)
+        # resize image
+        x = torch.from_numpy(cv2.resize(X_te[i].reshape(16, 16), dim, interpolation=cv2.INTER_AREA).reshape(1, 28, 28
+                                                                                                            ))
         label = y_te[i]
         before_time = time()
-
-        # make the prediction
-        prediction = smoothed_classifier.predict(
-            x, args.N, args.alpha, args.batch)
-        # prediction = base_classifier(x.repeat((args.batch, 1, 1, 1))).argmax(1)
-
+        # certify the prediction of g around x
+        # x = x.cuda()
+        prediction, radius = smoothed_classifier.certify(
+            x, args.N0, args.N, args.alpha, args.batch)
         after_time = time()
         correct = int(prediction == label)
-        if correct == 1:
-            count = count + 1
 
         time_elapsed = str(datetime.timedelta(
             seconds=(after_time - before_time)))
+        print("{}\t{}\t{}\t{:.3}\t{}\t{}".format(
+            i, label, prediction, radius, correct, time_elapsed), file=f, flush=True)
 
-        # log the prediction and whether it was correct
-        print("{}\t{}\t{}\t{}\t{}".format(i, label, prediction,
-                                          correct, time_elapsed), file=f, flush=True)
-    acc = count/599
-    print("The accuracy is:", acc)
     f.close()

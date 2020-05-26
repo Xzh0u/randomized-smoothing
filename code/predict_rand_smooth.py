@@ -62,12 +62,12 @@ if __name__ == "__main__":
         before_time = time()
 
         # make the prediction
-        # prediction = smoothed_classifier.predict(
-        #     x, args.N, args.alpha, args.batch)
-        prediction = base_classifier(x.repeat((args.batch, 1, 1, 1))).argmax(1)
+        prediction = smoothed_classifier.predict(
+            x, args.N, args.alpha, args.batch)
+        # prediction = base_classifier(x.repeat((args.batch, 1, 1, 1))).argmax(1)
 
         after_time = time()
-        correct = int(int(prediction[0]) == label)
+        correct = int(prediction == label)
         if correct == 1:
             count = count + 1
 
@@ -75,8 +75,8 @@ if __name__ == "__main__":
             seconds=(after_time - before_time)))
 
         # log the prediction and whether it was correct
-        print("{}\t{}\t{}\t{}\t{}".format(i, label, int(prediction[0]),
+        print("{}\t{}\t{}\t{}\t{}".format(i, label, prediction,
                                           correct, time_elapsed), file=f, flush=True)
-    acc = count/599
+    acc = format(float(count)/float(599), '.2f')
     print("The accuracy is:", acc)
     f.close()

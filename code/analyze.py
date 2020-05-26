@@ -1,12 +1,12 @@
+import math
+import seaborn as sns
+import pandas as pd
+from typing import *
+import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
 
 matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
-from typing import *
-import pandas as pd
-import seaborn as sns
-import math
 
 sns.set()
 
@@ -58,14 +58,16 @@ def plot_certified_accuracy(outfile: str, title: str, max_radius: float,
     radii = np.arange(0, max_radius + radius_step, radius_step)
     plt.figure()
     for line in lines:
-        plt.plot(radii * line.scale_x, line.quantity.at_radii(radii), line.plot_fmt)
+        plt.plot(radii * line.scale_x,
+                 line.quantity.at_radii(radii), line.plot_fmt)
 
     plt.ylim((0, 1))
     plt.xlim((0, max_radius))
     plt.tick_params(labelsize=14)
     plt.xlabel("radius", fontsize=16)
     plt.ylabel("certified accuracy", fontsize=16)
-    plt.legend([method.legend for method in lines], loc='upper right', fontsize=16)
+    plt.legend([method.legend for method in lines],
+               loc='upper right', fontsize=16)
     plt.savefig(outfile + ".pdf")
     plt.tight_layout()
     plt.title(title, fontsize=20)
@@ -87,7 +89,8 @@ def smallplot_certified_accuracy(outfile: str, title: str, max_radius: float,
     plt.ylabel("certified accuracy", fontsize=22)
     plt.tick_params(labelsize=20)
     plt.gca().xaxis.set_major_locator(plt.MultipleLocator(xticks))
-    plt.legend([method.legend for method in methods], loc='upper right', fontsize=20)
+    plt.legend([method.legend for method in methods],
+               loc='upper right', fontsize=20)
     plt.tight_layout()
     plt.savefig(outfile + ".pdf")
     plt.close()
@@ -152,58 +155,95 @@ def markdown_table_certified_accuracy(outfile: str, radius_start: float, radius_
 
 if __name__ == "__main__":
     latex_table_certified_accuracy(
-        "analysis/latex/vary_noise_cifar10", 0.25, 1.5, 0.25, [
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.12/test/sigma_0.12"), "$\sigma = 0.12$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.25/test/sigma_0.25"), "$\sigma = 0.25$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.50/test/sigma_0.50"), "$\sigma = 0.50$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_1.00/test/sigma_1.00"), "$\sigma = 1.00$"),
-        ])
-    markdown_table_certified_accuracy(
-        "analysis/markdown/vary_noise_cifar10", 0.25, 1.5, 0.25, [
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.12/test/sigma_0.12"), "&sigma; = 0.12"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.25/test/sigma_0.25"), "&sigma; = 0.25"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.50/test/sigma_0.50"), "&sigma; = 0.50"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_1.00/test/sigma_1.00"), "&sigma; = 1.00"),
+        "analysis/latex/vary_noise_mnist&usps", 0.25, 1.5, 0.25, [
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.25/usps_0.25"), "$\sigma = 0.25$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.50/usps_0.50"), "$\sigma = 0.50$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_1.00/usps_1.00"), "$\sigma = 1.00$"),
         ])
     latex_table_certified_accuracy(
-        "analysis/latex/vary_noise_imagenet", 0.5, 3.0, 0.5, [
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.25/test/sigma_0.25"), "$\sigma = 0.25$"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.50/test/sigma_0.50"), "$\sigma = 0.50$"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_1.00/test/sigma_1.00"), "$\sigma = 1.00$"),
+        "analysis/latex/vary_noise_mnist", 0.25, 1.5, 0.25, [
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.25/mnist_0.25"), "$\sigma = 0.25$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.50/mnist_0.50"), "$\sigma = 0.50$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_1.00/mnist_1.00"), "$\sigma = 1.00$"),
         ])
-    markdown_table_certified_accuracy(
-        "analysis/markdown/vary_noise_imagenet", 0.5, 3.0, 0.5, [
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.25/test/sigma_0.25"), "&sigma; = 0.25"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.50/test/sigma_0.50"), "&sigma; = 0.50"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_1.00/test/sigma_1.00"), "&sigma; = 1.00"),
+    # markdown_table_certified_accuracy(
+    #     "analysis/markdown/vary_noise_mnist&usps", 0.25, 1.5, 0.25, [
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/mnist/lenet/noise_0.25/usps_0.25"), "&sigma; = 0.25"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/mnist/lenet/noise_0.50/usps_0.50"), "&sigma; = 0.50"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/mnist/lenet/noise_1.00/usps_1.00"), "&sigma; = 1.00"),
+    #     ])
+    # latex_table_certified_accuracy(
+    #     "analysis/latex/vary_noise_imagenet", 0.5, 3.0, 0.5, [
+    #         Line(ApproximateAccuracy("data/certify/mnist/lenet/noise_0.25/test/sigma_0.25"), "$\sigma = 0.25$"),
+    #         Line(ApproximateAccuracy("data/certify/mnist/lenet/noise_0.50/test/sigma_0.50"), "$\sigma = 0.50$"),
+    #         Line(ApproximateAccuracy("data/certify/mnist/lenet/noise_1.00/test/sigma_1.00"), "$\sigma = 1.00$"),
+    #     ])
+    # markdown_table_certified_accuracy(
+    #     "analysis/markdown/vary_noise_imagenet", 0.5, 3.0, 0.5, [
+    #         Line(ApproximateAccuracy("data/certify/mnist/lenet/noise_0.25/test/sigma_0.25"), "&sigma; = 0.25"),
+    #         Line(ApproximateAccuracy("data/certify/mnist/lenet/noise_0.50/test/sigma_0.50"), "&sigma; = 0.50"),
+    #         Line(ApproximateAccuracy("data/certify/mnist/lenet/noise_1.00/test/sigma_1.00"), "&sigma; = 1.00"),
+    #     ])
+    # plot_certified_accuracy(
+    #     "analysis/plots/vary_noise_cifar10", "CIFAR-10, vary $\sigma$", 1.5, [
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_0.12/test/sigma_0.12"), "$\sigma = 0.12$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_0.25/test/sigma_0.25"), "$\sigma = 0.25$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_0.50/test/sigma_0.50"), "$\sigma = 0.50$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_1.00/test/sigma_1.00"), "$\sigma = 1.00$"),
+    #     ])
+    # plot_certified_accuracy(
+    #     "analysis/plots/vary_train_noise_cifar_050", "CIFAR-10, vary train noise, $\sigma=0.5$", 1.5, [
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_0.25/test/sigma_0.50"), "train $\sigma = 0.25$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_0.50/test/sigma_0.50"), "train $\sigma = 0.50$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/cifar10/resnet110/noise_1.00/test/sigma_0.50"), "train $\sigma = 1.00$"),
+    #     ])
+    # plot_certified_accuracy(
+    #     "analysis/plots/vary_train_noise_mnist&usps", "Mnist, vary train noise, $\sigma=0.5$", 1.5, [
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/mnist/lenet/noise_0.25/usps_0.50"), "train $\sigma = 0.25$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/mnist/lenet/noise_0.50/usps_0.50"), "train $\sigma = 0.50$"),
+    #         Line(ApproximateAccuracy(
+    #             "data/certify/mnist/lenet/noise_1.00/usps_0.50"), "train $\sigma = 1.00$"),
+    #     ])
+    plot_certified_accuracy(
+        "analysis/plots/vary_noise_mnist&usps", "Mnist, vary $\sigma$", 4, [
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.25/usps_0.25"), "$\sigma = 0.25$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.50/usps_0.50"), "$\sigma = 0.50$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_1.00/usps_1.00"), "$\sigma = 1.00$"),
         ])
     plot_certified_accuracy(
-        "analysis/plots/vary_noise_cifar10", "CIFAR-10, vary $\sigma$", 1.5, [
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.12/test/sigma_0.12"), "$\sigma = 0.12$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.25/test/sigma_0.25"), "$\sigma = 0.25$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.50/test/sigma_0.50"), "$\sigma = 0.50$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_1.00/test/sigma_1.00"), "$\sigma = 1.00$"),
-        ])
-    plot_certified_accuracy(
-        "analysis/plots/vary_train_noise_cifar_050", "CIFAR-10, vary train noise, $\sigma=0.5$", 1.5, [
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.25/test/sigma_0.50"), "train $\sigma = 0.25$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_0.50/test/sigma_0.50"), "train $\sigma = 0.50$"),
-            Line(ApproximateAccuracy("data/certify/cifar10/resnet110/noise_1.00/test/sigma_0.50"), "train $\sigma = 1.00$"),
-        ])
-    plot_certified_accuracy(
-        "analysis/plots/vary_train_noise_imagenet_050", "ImageNet, vary train noise, $\sigma=0.5$", 1.5, [
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.25/test/sigma_0.50"), "train $\sigma = 0.25$"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.50/test/sigma_0.50"), "train $\sigma = 0.50$"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_1.00/test/sigma_0.50"), "train $\sigma = 1.00$"),
-        ])
-    plot_certified_accuracy(
-        "analysis/plots/vary_noise_imagenet", "ImageNet, vary $\sigma$", 4, [
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.25/test/sigma_0.25"), "$\sigma = 0.25$"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.50/test/sigma_0.50"), "$\sigma = 0.50$"),
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_1.00/test/sigma_1.00"), "$\sigma = 1.00$"),
+        "analysis/plots/vary_noise_mnist", "Mnist, vary $\sigma$", 4, [
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.25/mnist_0.25"), "$\sigma = 0.25$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.50/mnist_0.50"), "$\sigma = 0.50$"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_1.00/mnist_1.00"), "$\sigma = 1.00$"),
         ])
     plot_certified_accuracy(
         "analysis/plots/high_prob", "Approximate vs. High-Probability", 2.0, [
-            Line(ApproximateAccuracy("data/certify/imagenet/resnet50/noise_0.50/test/sigma_0.50"), "Approximate"),
-            Line(HighProbAccuracy("data/certify/imagenet/resnet50/noise_0.50/test/sigma_0.50", 0.001, 0.001), "High-Prob"),
+            Line(ApproximateAccuracy(
+                "data/certify/mnist/lenet/noise_0.50/usps_0.50"), "Approximate"),
+            Line(HighProbAccuracy(
+                "data/certify/mnist/lenet/noise_0.50/usps_0.50", 0.001, 0.001), "High-Prob"),
         ])

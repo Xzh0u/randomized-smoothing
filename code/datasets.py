@@ -121,7 +121,7 @@ def _usps(split: str) -> Dataset:
 
 
 def _mnist_texture(split: str) -> Dataset:
-    X_tr = np.load('dataset_cache/MNIST_/Xtrain_random.npy')
+    X_tr = np.load('dataset_cache/MNIST_/Xtrain_lowFreq.npy')
     y_tr = get_dataset("mnist", "train").targets
     if split == "train":
         return X_tr, y_tr

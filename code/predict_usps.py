@@ -84,6 +84,6 @@ if __name__ == "__main__":
         # log the prediction and whether it was correct
         print("{}\t{}\t{}\t{}\t{}".format(i, label, prediction,
                                           correct, time_elapsed), file=f, flush=True)
-    acc = count/20
+    acc = format(float(count)/float(72), '.2f')
     print("The accuracy is:", acc)
     f.close()
