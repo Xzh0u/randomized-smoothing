@@ -5,3 +5,4 @@ models
 data
 dataset_cache
 figures
+__pycache__
